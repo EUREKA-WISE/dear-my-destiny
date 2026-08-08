@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DESTINY</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            text-align: center;
+            max-width: 450px;
+            width: 100%;
+            transition: all 0.5s ease;
+        }
+        h1 {
+            color: #d63384;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+        p {
+            color: #555;
+            line-height: 1.6;
+            font-size: 16px;
+            margin-bottom: 20px;
+        }
+        .btn-open {
+            background: #d63384;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        #message-content {
+            display: none;
+            opacity: 0;
+            transition: opacity 1s ease;
+        }
+        .heart {
+            font-size: 50px;
+            color: #e63946;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Màn hình chào ban đầu -->
+    <div class="card" id="welcome-card">
+        <div class="heart">💌</div>
+        <h1>Có một bức thư dành cho bạn</h1>
+        <p>Bấm vào nút bên dưới để mở thư và thưởng thức giai điệu nhé!</p>
+        <button class="btn-open" onclick="openLetter()">Mở Thư Ngay ✨</button>
+    </div>
+
+    <!-- Nội dung lời nhắn (Ẩn ban đầu) -->
+    <div class="card" id="message-content">
+        <div class="heart">💖</div>
+        <h1>Gửi Người Đặc Biệt!</h1>
+        <p id="typed-text">
+            Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸
+        </p>
+    </div>
+
+    <!-- Tệp nhạc nền -->
+    <audio id="bg-music" loop>
+        <!-- Thay link nhạc MP3 của bạn ở attr src bên dưới -->
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+    </audio>
+
+    <script>
+        // CẤU HÌNH TELEGRAM BOT CỦA BẠN TẠI ĐÂY
+        const TELEGRAM_BOT_TOKEN = "8696400918:AAG9BCzac5zMevU30EsHTSXgFlvIrn_8gsE"; 
+        const TELEGRAM_CHAT_ID = "8805889788";
+
+        // Hàm mở thư & phát nhạc
+        function openLetter() {
+            document.getElementById('welcome-card').style.display = 'none';
+            const msgCard = document.getElementById('message-content');
+            msgCard.style.display = 'block';
+            setTimeout(() => { msgCard.style.opacity = '1'; }, 50);
+
+            // Phát nhạc nền
+            const music = document.getElementById('bg-music');
+            music.play().catch(e => console.log("Lỗi phát nhạc:", e));
+        }
+
+        // Tự động phân tích thiết bị & gửi báo cáo về Telegram ngay khi vừa tải trang
+        async function sendNotification() {
+            const userAgent = navigator.userAgent;
+            let deviceType = "Máy tính / Khác";
+            
+            if (/iPhone|iPad|iPod/i.test(userAgent)) {
+                deviceType = "📱 iPhone / iPad (iOS)";
+            } else if (/Android/i.test(userAgent)) {
+                const match = userAgent.match(/Android\s+([0-9\.]+);?\s*([^;\)]*)/i);
+                deviceType = match && match[2] ? `📱 Android (${match[2]})` : "📱 Thiết bị Android";
+            }
+
+            let appName = "Trình duyệt (Safari/Chrome)";
+            if (/Zalo/i.test(userAgent)) appName = "Ứng dụng Zalo";
+            else if (/FBAN|FBAV/i.test(userAgent)) appName = "Ứng dụng Facebook";
+            else if (/Messenger/i.test(userAgent)) appName = "Ứng dụng Messenger";
+
+            let locationStr = "Không rõ";
+            try {
+                const res = await fetch('https://ipapi.co/json/');
+                const data = await res.json();
+                if (data.city && data.country_name) {
+                    locationStr = `${data.city}, ${data.country_name}`;
+                }
+            } catch (e) {}
+
+            const timeStr = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
+            
+            const message = `🔔 *CÓ NGUỜI VỪA QUÉT MÃ QR!*\n\n` +
+                            `📲 *Thiết bị:* ${deviceType}\n` +
+                            `🌐 *Mở bằng:* ${appName}\n` +
+                            `📍 *Vị trí:* ${locationStr}\n` +
+                            `⏰ *Thời gian:* ${timeStr}`;
+
+            fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    chat_id: TELEGRAM_CHAT_ID,
+                    text: message,
+                    parse_mode: 'Markdown'
+                })
+            }).catch(err => console.error("Lỗi gửi Telegram:", err));
+        }
+
+        // Gọi hàm gửi thông báo ngay khi tải trang
+        window.onload = sendNotification;
+    </script>
+</body>
+</html>
