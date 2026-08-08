@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DESTINY</title>
+    <title>Gửi Bạn Lời Nhắn Đặc Biệt</title>
     <style>
         * {
             box-sizing: border-box;
@@ -20,7 +20,7 @@
             padding: 20px;
         }
         .card {
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.1);
@@ -35,10 +35,23 @@
             font-size: 24px;
         }
         p {
-            color: #555;
-            line-height: 1.6;
+            color: #444;
+            line-height: 1.7;
             font-size: 16px;
             margin-bottom: 20px;
+            text-align: left; /* Căn trái cho lời nhắn giống bức thư */
+            min-height: 100px; /* Giữ khung không bị co giãn khi đang gõ */
+        }
+        /* Hiệu ứng con trỏ nhấp nháy khi gõ chữ */
+        .typing-cursor::after {
+            content: '|';
+            color: #d63384;
+            font-weight: bold;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
         .btn-open {
             background: #d63384;
@@ -59,59 +72,81 @@
         #message-content {
             display: none;
             opacity: 0;
-            transition: opacity 1s ease;
+            transition: opacity 0.8s ease;
         }
         .heart {
             font-size: 50px;
             color: #e63946;
             margin-bottom: 10px;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <!-- Màn hình chào ban đầu -->
     <div class="card" id="welcome-card">
         <div class="heart">💌</div>
         <h1>Có một bức thư dành cho bạn</h1>
-        <p>Bấm vào nút bên dưới để mở thư và thưởng thức giai điệu nhé!</p>
+        <p style="text-align: center;">Bấm vào nút bên dưới để mở thư và thưởng thức giai điệu nhé!</p>
         <button class="btn-open" onclick="openLetter()">Mở Thư Ngay ✨</button>
     </div>
 
-    <!-- Nội dung lời nhắn (Ẩn ban đầu) -->
     <div class="card" id="message-content">
         <div class="heart">💖</div>
-        <h1>Gửi Người Đặc Biệt!</h1>
-        <p id="typed-text">
-            Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸
-        </p>
+        <h1 style="text-align: center;">Gửi Người Đặc Biệt!</h1>
+        
+        <p id="typed-text" class="typing-cursor"></p>
     </div>
 
-    <!-- Tệp nhạc nền -->
     <audio id="bg-music" loop>
-        <!-- Thay link nhạc MP3 của bạn ở attr src bên dưới -->
-        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3" type="audio/mpeg">
+        <source src="nhac.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // CẤU HÌNH TELEGRAM BOT CỦA BẠN TẠI ĐÂY
+        // 1. ĐIỀN LẠI TELEGRAM BOT TOKEN VÀ CHAT ID CỦA BẠN VÀO ĐÂY
         const TELEGRAM_BOT_TOKEN = "8696400918:AAG9BCzac5zMevU30EsHTSXgFlvIrn_8gsE"; 
         const TELEGRAM_CHAT_ID = "8805889788";
 
-        // Hàm mở thư & phát nhạc
+        // 2. NỘI DUNG LỜI NHẮN BẠN MUỐN GÕ (Thay đổi tùy ý)
+        const fullMessage = "Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸";
+
+        let charIndex = 0;
+        const typingSpeed = 50; // Tốc độ gõ: 50ms cho mỗi ký tự (càng nhỏ gõ càng nhanh)
+
+        // Hàm tạo hiệu ứng gõ chữ
+        function typeWriter() {
+            const typedTextElement = document.getElementById("typed-text");
+            if (charIndex < fullMessage.length) {
+                typedTextElement.innerHTML += fullMessage.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, typingSpeed);
+            } else {
+                // Khi gõ xong thì ẩn con trỏ nhấp nháy đi
+                typedTextElement.classList.remove("typing-cursor");
+            }
+        }
+
+        // Hàm mở thư, phát nhạc và bắt đầu gõ chữ
         function openLetter() {
             document.getElementById('welcome-card').style.display = 'none';
             const msgCard = document.getElementById('message-content');
             msgCard.style.display = 'block';
-            setTimeout(() => { msgCard.style.opacity = '1'; }, 50);
+            
+            setTimeout(() => { 
+                msgCard.style.opacity = '1';
+                // Bắt đầu chạy hiệu ứng gõ chữ
+                typeWriter();
+            }, 100);
 
             // Phát nhạc nền
             const music = document.getElementById('bg-music');
             music.play().catch(e => console.log("Lỗi phát nhạc:", e));
         }
 
-        // Tự động phân tích thiết bị & gửi báo cáo về Telegram ngay khi vừa tải trang
+        // Tự động gửi thông báo báo về Telegram khi có người mở web
         async function sendNotification() {
+            if (TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return; // Bỏ qua nếu chưa điền token
+
             const userAgent = navigator.userAgent;
             let deviceType = "Máy tính / Khác";
             
@@ -155,7 +190,6 @@
             }).catch(err => console.error("Lỗi gửi Telegram:", err));
         }
 
-        // Gọi hàm gửi thông báo ngay khi tải trang
         window.onload = sendNotification;
     </script>
 </body>
