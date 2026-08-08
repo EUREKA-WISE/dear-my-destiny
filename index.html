@@ -18,16 +18,25 @@
             justify-content: center;
             align-items: center;
             padding: 20px;
+            overflow: hidden; /* Tránh hiện thanh cuộn khi máy bay bay */
+            perspective: 1000px; /* Tạo hiệu ứng không gian 3D */
         }
         .card {
             background: rgba(255, 255, 255, 0.95);
             padding: 30px;
             border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
             text-align: center;
             max-width: 450px;
             width: 100%;
-            transition: all 0.5s ease;
+            position: absolute;
+            backface-visibility: hidden;
+        }
+
+        /* --- MÀN HÌNH CHÀO BAN ĐẦU --- */
+        #welcome-card {
+            z-index: 10;
+            transition: all 0.8s cubic-bezier(0.68, -0.55, 0.265, 1.55);
         }
         h1 {
             color: #d63384;
@@ -39,19 +48,6 @@
             line-height: 1.7;
             font-size: 16px;
             margin-bottom: 20px;
-            text-align: left; /* Căn trái cho lời nhắn giống bức thư */
-            min-height: 100px; /* Giữ khung không bị co giãn khi đang gõ */
-        }
-        /* Hiệu ứng con trỏ nhấp nháy khi gõ chữ */
-        .typing-cursor::after {
-            content: '|';
-            color: #d63384;
-            font-weight: bold;
-            animation: blink 0.8s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
         }
         .btn-open {
             background: #d63384;
@@ -69,16 +65,91 @@
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
+
+        /* --- MÁY BAY GIẤY VÀ HIỆU ỨNG BAY --- */
+        #plane-container {
+            position: absolute;
+            display: none;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .plane-svg {
+            width: 100px;
+            height: 100px;
+            fill: #d63384;
+            filter: drop-shadow(0 15px 10px rgba(0,0,0,0.2));
+        }
+
+        /* Animation gấp thiệp & máy bay bay */
+        .fold-card {
+            animation: foldAndShrink 0.8s forwards ease-in-out;
+        }
+        .fly-plane {
+            animation: flyAcrossScreen 2s forwards ease-in-out;
+        }
+        .unfold-letter {
+            animation: unfoldCard 1s forwards cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes foldAndShrink {
+            0% { transform: scale(1) rotate(0deg); opacity: 1; }
+            50% { transform: scale(0.5) rotateX(60deg); opacity: 0.8; }
+            100% { transform: scale(0) rotateX(90deg); opacity: 0; }
+        }
+
+        @keyframes flyAcrossScreen {
+            0% {
+                transform: translate(-250px, 200px) scale(0.4) rotate(-30deg);
+                opacity: 0;
+            }
+            30% {
+                transform: translate(-50px, -100px) scale(1.2) rotate(15deg);
+                opacity: 1;
+            }
+            60% {
+                transform: translate(150px, -50px) scale(0.9) rotate(-10deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(0px, 0px) scale(2.2) rotate(0deg);
+                opacity: 0;
+            }
+        }
+
+        @keyframes unfoldCard {
+            0% {
+                transform: scale(0) rotateY(-90deg);
+                opacity: 0;
+            }
+            100% {
+                transform: scale(1) rotateY(0deg);
+                opacity: 1;
+            }
+        }
+
+        /* --- BỨC THƯ CUỐI CÙNG --- */
         #message-content {
             display: none;
             opacity: 0;
-            transition: opacity 0.8s ease;
+            z-index: 5;
+        }
+        .typing-text {
+            text-align: left;
+            min-height: 100px;
+        }
+        .typing-cursor::after {
+            content: '|';
+            color: #d63384;
+            font-weight: bold;
+            animation: blink 0.8s infinite;
+        }
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
         }
         .heart {
             font-size: 50px;
-            color: #e63946;
             margin-bottom: 10px;
-            text-align: center;
         }
     </style>
 </head>
@@ -87,33 +158,68 @@
     <div class="card" id="welcome-card">
         <div class="heart">💌</div>
         <h1>Có một bức thư dành cho bạn</h1>
-        <p style="text-align: center;">Bấm vào nút bên dưới để mở thư và thưởng thức giai điệu nhé!</p>
-        <button class="btn-open" onclick="openLetter()">Mở Thư Ngay ✨</button>
+        <p>Bấm vào nút bên dưới để nhận thư nhé!</p>
+        <button class="btn-open" onclick="startSequence()">Mở Thư Ngay ✨</button>
+    </div>
+
+    <div id="plane-container">
+        <svg class="plane-svg" viewBox="0 0 24 24">
+            <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+        </svg>
     </div>
 
     <div class="card" id="message-content">
         <div class="heart">💖</div>
-        <h1 style="text-align: center;">Gửi Người Đặc Biệt!</h1>
-        
-        <p id="typed-text" class="typing-cursor"></p>
+        <h1>Gửi Người Đặc Biệt!</h1>
+        <p id="typed-text" class="typing-text typing-cursor"></p>
     </div>
 
-    <audio id="bg-music" loop>
+    <audio id="bg-music" loop preload="auto">
         <source src="nhac.mp3" type="audio/mpeg">
     </audio>
 
     <script>
-        // 1. ĐIỀN LẠI TELEGRAM BOT TOKEN VÀ CHAT ID CỦA BẠN VÀO ĐÂY
+        // --- 1. ĐIỀN THÔNG TIN TELEGRAM BOT CỦA BẠN ---
         const TELEGRAM_BOT_TOKEN = "8696400918:AAG9BCzac5zMevU30EsHTSXgFlvIrn_8gsE"; 
         const TELEGRAM_CHAT_ID = "8805889788";
 
-        // 2. NỘI DUNG LỜI NHẮN BẠN MUỐN GÕ (Thay đổi tùy ý)
+        // --- 2. NỘI DUNG LỜI NHẮN ---
         const fullMessage = "Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸";
 
         let charIndex = 0;
-        const typingSpeed = 50; // Tốc độ gõ: 50ms cho mỗi ký tự (càng nhỏ gõ càng nhanh)
+        const typingSpeed = 45; // Tốc độ gõ chữ (ms)
 
-        // Hàm tạo hiệu ứng gõ chữ
+        // Hàm chạy hiệu ứng chuỗi hành động (Sequence)
+        function startSequence() {
+            // A. Phát nhạc ngay lập tức khi bấm nút (Tránh bị chặn phát tự động)
+            const music = document.getElementById('bg-music');
+            music.play().catch(e => console.log("Lỗi phát nhạc:", e));
+
+            // B. Gấp màn hình chào
+            const welcomeCard = document.getElementById('welcome-card');
+            welcomeCard.classList.add('fold-card');
+
+            // C. Sau 0.7s: Hiện máy bay giấy bay lượn
+            setTimeout(() => {
+                welcomeCard.style.display = 'none';
+                const planeContainer = document.getElementById('plane-container');
+                planeContainer.style.display = 'block';
+                planeContainer.classList.add('fly-plane');
+            }, 700);
+
+            // D. Sau 2.5s (Máy bay bay xong): Mở bức thư & gõ chữ
+            setTimeout(() => {
+                document.getElementById('plane-container').style.display = 'none';
+                const msgCard = document.getElementById('message-content');
+                msgCard.style.display = 'block';
+                msgCard.classList.add('unfold-letter');
+                
+                // Bắt đầu gõ chữ
+                typeWriter();
+            }, 2500);
+        }
+
+        // Hàm gõ chữ tự động
         function typeWriter() {
             const typedTextElement = document.getElementById("typed-text");
             if (charIndex < fullMessage.length) {
@@ -121,31 +227,13 @@
                 charIndex++;
                 setTimeout(typeWriter, typingSpeed);
             } else {
-                // Khi gõ xong thì ẩn con trỏ nhấp nháy đi
                 typedTextElement.classList.remove("typing-cursor");
             }
         }
 
-        // Hàm mở thư, phát nhạc và bắt đầu gõ chữ
-        function openLetter() {
-            document.getElementById('welcome-card').style.display = 'none';
-            const msgCard = document.getElementById('message-content');
-            msgCard.style.display = 'block';
-            
-            setTimeout(() => { 
-                msgCard.style.opacity = '1';
-                // Bắt đầu chạy hiệu ứng gõ chữ
-                typeWriter();
-            }, 100);
-
-            // Phát nhạc nền
-            const music = document.getElementById('bg-music');
-            music.play().catch(e => console.log("Lỗi phát nhạc:", e));
-        }
-
-        // Tự động gửi thông báo báo về Telegram khi có người mở web
+        // Tự động gửi thông báo báo về Telegram khi có người quét mã
         async function sendNotification() {
-            if (TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return; // Bỏ qua nếu chưa điền token
+            if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return;
 
             const userAgent = navigator.userAgent;
             let deviceType = "Máy tính / Khác";
