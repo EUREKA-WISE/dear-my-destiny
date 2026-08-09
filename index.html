@@ -164,13 +164,51 @@
             background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
             background-color: #fdf5e6;
         }
-        .letter-content {
-            width: 85%; max-width: 500px; padding: 30px;
-            background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-            font-size: 18px; line-height: 1.8; border-radius: 15px; text-align: justify;
-            z-index: 20; position: relative;
-        }
+        /* === KHUNG THƯ & THANH CUỘN TÙY CHỈNH === */
+    .letter-content {
+        width: 85%; max-width: 500px; max-height: 80vh; padding: 30px;
+        background: rgba(255, 255, 255, 0.95);
+        box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        font-size: 18px; line-height: 1.8; border-radius: 15px; text-align: justify;
+        z-index: 20; position: relative;
+        display: flex; flex-direction: column;
+    }
+    
+    /* Vùng chứa văn bản có thanh cuộn */
+    .text-scroll-container {
+        overflow-y: auto;
+        max-height: 45vh; /* Giới hạn chiều cao phần chữ để khung thư không bị dài quá màn hình điện thoại */
+        padding-right: 8px;
+        margin-bottom: 10px;
+        /* Tạo thanh cuộn mỏng màu hồng dễ thương */
+        scrollbar-width: thin;
+        scrollbar-color: #ff4081 #fce4ec;
+    }
+    .text-scroll-container::-webkit-scrollbar {
+        width: 6px;
+    }
+    .text-scroll-container::-webkit-scrollbar-track {
+        background: #fce4ec;
+        border-radius: 10px;
+    }
+    .text-scroll-container::-webkit-scrollbar-thumb {
+        background-color: #ff4081;
+        border-radius: 10px;
+    }
+
+    .typing-text { min-height: 100px; color: #444; margin: 0; }
+    
+    /* Sticker mèo góc thư */
+    .letter-sticker {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        width: 75px;
+        height: auto;
+        animation: stickerBounce 2s ease-in-out infinite alternate;
+        filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));
+        z-index: 10;
+    }
         .typing-text { min-height: 150px; color: #444; }
         .typing-cursor::after { content: '|'; color: #d63384; font-weight: bold; animation: blink 0.8s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
@@ -192,8 +230,8 @@
         <img class="cat-gif cat-walking" src="meo6.gif" alt="Mèo đi bộ">
         
         <!-- Mèo bay lơ lửng -->
-        <img class="cat-gif cat-floating" src="meo2.gif" alt="Mèo lơ lửng">
-        <img class="cat-gif cat-floating1" src="meo5.gif" alt="Mèo lơ lửng">
+        <img class="cat-gif cat-floating" src="meo5.gif" alt="Mèo lơ lửng">
+        <img class="cat-gif cat-floating1" src="meo2.gif" alt="Mèo lơ lửng">
         
         <!-- Mèo lấp ló -->
         <img class="cat-gif cat-peeking" src="meo7.gif" alt="Mèo lấp ló">
@@ -221,16 +259,19 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH 4: NỘI DUNG THƯ (CÓ STICKER MÈO Ở GÓC) -->
+    <!-- MÀN HÌNH 4: NỘI DUNG THƯ (CÓ THANH CUỘN) -->
     <div class="screen" id="letter-screen">
         <div class="letter-content">
-            <div style="font-size: 40px; text-align: center; margin-bottom: 10px;">💖</div>
-            <h2 style="color: #d81b60; text-align: center; margin-bottom: 20px;">Gửi Người Đặc Biệt!</h2>
-            <p id="typed-text" class="typing-text typing-cursor"></p>
+            <div style="font-size: 40px; text-align: center; margin-bottom: 5px;">💖</div>
+            <h2 style="color: #d81b60; text-align: center; margin-bottom: 15px;">Gửi Người Đặc Biệt!</h2>
             
-            <!-- STICKER MÈO GIF ĐẶT Ở GÓC DƯỚI BỨC THƯ -->
-            <img class="letter-sticker" src="meo1.gif" alt="Sticker Mèo Giao Diện Thư">
-            <img class="letter-sticker" src="meo4.gif" alt="Sticker Mèo Giao Diện Thư">
+            <!-- THÊM THẺ DIV NÀY ĐỂ TẠO KHUNG CUỘN CHO CHỮ -->
+            <div class="text-scroll-container" id="text-scroll">
+                <p id="typed-text" class="typing-text typing-cursor"></p>
+            </div>
+            
+            <!-- STICKER MÈO GIF Ở GÓC -->
+            <img class="letter-sticker" src="meo6.gif" alt="Sticker Mèo Giao Diện Thư">
         </div>
     </div>
 
