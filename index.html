@@ -45,7 +45,7 @@
 
         /* 1. Mèo đi bộ dạo ngang màn hình */
         .cat-walking {
-            bottom: 50px;
+            bottom: 150px;
             left: -150px;
             animation: catWalk 14s linear infinite;
         }
@@ -89,7 +89,22 @@
             0%, 100% { transform: translateY(100%); } /* Nấp đi */
             15%, 85% { transform: translateY(-40px) rotate(-10deg); } /* Ló đầu ra */
         }
-
+        
+        /* === STICKER GIF MÈO Ở GÓC BỨC THƯ === */
+        .letter-sticker {
+            position: absolute;
+            bottom: 15px;
+            right: 20px;
+            width: 75px;
+            height: auto;
+            animation: stickerBounce 2s ease-in-out infinite alternate;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));
+        }
+        @keyframes stickerBounce {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-8px) rotate(5deg); }
+        }
+        
         /* === MÀN HÌNH INTRO === */
         #intro-screen { z-index: 10; }
         .btn-open {
@@ -174,14 +189,14 @@
    <!-- LỚP CHỨA CÁC BÉ MÈO GIF CỰC ĐẸP -->
     <div id="cat-layer">
         <!-- Mèo đi bộ -->
-        <img class="cat-gif cat-walking" src="meo1.gif" alt="Mèo đi bộ">
+        <img class="cat-gif cat-walking" src="meo6.gif" alt="Mèo đi bộ">
         
         <!-- Mèo bay lơ lửng -->
         <img class="cat-gif cat-floating" src="meo2.gif" alt="Mèo lơ lửng">
         <img class="cat-gif cat-floating1" src="meo5.gif" alt="Mèo lơ lửng">
         
         <!-- Mèo lấp ló -->
-        <img class="cat-gif cat-peeking" src="meo4.gif" alt="Mèo lấp ló">
+        <img class="cat-gif cat-peeking" src="meo7.gif" alt="Mèo lấp ló">
     </div>
 
     <!-- MÀN HÌNH 1: INTRO -->
@@ -206,12 +221,16 @@
         </div>
     </div>
 
-    <!-- MÀN HÌNH 4: NỘI DUNG THƯ -->
+    <!-- MÀN HÌNH 4: NỘI DUNG THƯ (CÓ STICKER MÈO Ở GÓC) -->
     <div class="screen" id="letter-screen">
         <div class="letter-content">
             <div style="font-size: 40px; text-align: center; margin-bottom: 10px;">💖</div>
             <h2 style="color: #d81b60; text-align: center; margin-bottom: 20px;">Gửi Người Đặc Biệt!</h2>
             <p id="typed-text" class="typing-text typing-cursor"></p>
+            
+            <!-- STICKER MÈO GIF ĐẶT Ở GÓC DƯỚI BỨC THƯ -->
+            <img class="letter-sticker" src="meo1.gif" alt="Sticker Mèo Giao Diện Thư">
+            <img class="letter-sticker" src="meo4.gif" alt="Sticker Mèo Giao Diện Thư">
         </div>
     </div>
 
