@@ -3,86 +3,136 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gửi Bạn Lời Nhắn Đặc Biệt</title>
+    <title>Thư Gửi Người Thương</title>
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-        body {
+        /* === CÀI ĐẶT CHUNG === */
+        body, html {
+            margin: 0; padding: 0; width: 100%; height: 100%;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
-            min-height: 100vh;
+            background-color: #fce4ec;
+            overflow: hidden;
+        }
+
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 20px;
-            overflow: hidden; 
-            perspective: 1000px;
-        }
-        .card {
-            background: rgba(255, 255, 255, 0.95);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-            text-align: center;
-            max-width: 450px;
-            width: 100%;
-            position: absolute;
-            z-index: 10;
+            flex-direction: column;
+            transition: opacity 1s ease-in-out;
         }
 
-        /* --- NÚT BẤM --- */
-        h1 { color: #d63384; margin-bottom: 15px; font-size: 24px; }
-        p { color: #444; line-height: 1.7; font-size: 16px; margin-bottom: 20px; }
+        /* Màn hình ban đầu bị ẩn mặc định, dùng JS để bật */
+        #video-screen, #letter-screen, #envelope-transition-screen {
+            opacity: 0;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* === 1. MÀN HÌNH INTRO === */
+        #intro-screen {
+            z-index: 10;
+        }
         .btn-open {
-            background: #d63384;
+            padding: 15px 40px;
+            font-size: 20px;
+            background-color: #ff4081;
             color: white;
             border: none;
-            padding: 12px 30px;
-            font-size: 16px;
             border-radius: 30px;
             cursor: pointer;
-            box-shadow: 0 4px 15px rgba(214, 51, 132, 0.4);
+            box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
+            transition: transform 0.2s;
             animation: pulse 2s infinite;
         }
+        .btn-open:hover { transform: scale(1.05); }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
 
-        /* --- LỚP VIDEO CHUYỂN CẢNH KÍN MÀN HÌNH --- */
-        #transition-video {
+        /* === HIỆU ỨNG MÂY MÙ TRẮNG === */
+        .fog-overlay {
             position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            object-fit: cover; 
-            display: none; 
-            z-index: 50; 
+            top: 50%; left: 50%;
+            width: 300vw; height: 300vw;
+            background: radial-gradient(circle, rgba(255,255,255,1) 10%, rgba(255,255,255,0.8) 40%, transparent 70%);
+            transform: translate(-50%, -50%) scale(0);
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 1.5s ease-in, opacity 1s ease-out;
+        }
+        .fog-overlay.active { transform: translate(-50%, -50%) scale(1); }
+        .fog-overlay.fade-out { opacity: 0; }
+
+        /* === 2. MÀN HÌNH VIDEO === */
+        video {
+            width: 80%;
+            max-width: 800px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
             background-color: black;
-            transition: opacity 1s ease; /* Hiệu ứng mờ dần khi tắt video */
         }
 
-        /* --- BỨC THƯ CUỐI CÙNG --- */
-        #message-content {
-            display: none;
-            opacity: 0;
-            z-index: 5;
-            transform: scale(0.8);
-            transition: all 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        /* === HIỆU ỨNG 3: MỞ PHONG THƯ === */
+        #envelope-transition-screen {
+            background-color: #fdf6f0;
+            z-index: 20;
         }
-        .show-letter {
-            opacity: 1 !important;
-            transform: scale(1) !important;
+        .envelope {
+            width: 300px; height: 200px;
+            background-color: #e8d5b5;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
-        .typing-text {
-            text-align: left;
-            min-height: 100px;
+        .flap {
+            position: absolute; top: 0; left: 0;
+            border-left: 150px solid transparent;
+            border-right: 150px solid transparent;
+            border-top: 120px solid #d4b88c;
+            transform-origin: top;
+            transition: transform 1.5s ease-in-out;
+            z-index: 3;
         }
+        .envelope-body {
+            position: absolute; bottom: 0; left: 0;
+            border-left: 150px solid #e0c9a6;
+            border-right: 150px solid #e0c9a6;
+            border-bottom: 120px solid #c8b08f;
+            z-index: 2;
+        }
+        .paper-inside {
+            position: absolute;
+            bottom: 10px; left: 10px; right: 10px; height: 180px;
+            background-color: #fff;
+            z-index: 1;
+            transition: transform 1.5s ease-in-out;
+        }
+        .envelope.open .flap { transform: rotateX(180deg); }
+        .envelope.open .paper-inside { transform: translateY(-100px); }
+
+        /* === 4. MÀN HÌNH LÁ THƯ CHÍNH === */
+        #letter-screen {
+            z-index: 30;
+            background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
+            background-color: #fdf5e6;
+        }
+        .letter-content {
+            width: 85%;
+            max-width: 500px;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            font-size: 18px;
+            line-height: 1.8;
+            border-radius: 15px;
+            text-align: justify;
+        }
+        
+        /* Hiệu ứng con trỏ gõ chữ */
+        .typing-text { min-height: 150px; color: #444; }
         .typing-cursor::after {
             content: '|';
             color: #d63384;
@@ -93,99 +143,80 @@
             0%, 100% { opacity: 1; }
             50% { opacity: 0; }
         }
-        .heart { font-size: 50px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <!-- Màn hình chào ban đầu -->
-    <div class="card" id="welcome-card">
-        <div class="heart">💌</div>
-        <h1>Có một bức thư dành cho bạn</h1>
-        <p>Bấm vào nút bên dưới để nhận thư nhé!</p>
-        <button class="btn-open" onclick="startSequence()">Mở Thư Ngay ✨</button>
-    </div>
+    <!-- HIỆU ỨNG MÂY MÙ -->
+    <div class="fog-overlay" id="fog"></div>
 
-    <!-- Video chuyển cảnh 17 giây -->
-    <!-- Đảm bảo tên file video bạn tải lên GitHub đúng là may-bay.mp4 -->
-    <video id="transition-video" playsinline>
-        <source src="may-bay.mp4" type="video/mp4">
-    </video>
-
-    <!-- Bức thư hiện ra sau khi video kết thúc -->
-    <div class="card" id="message-content">
-        <div class="heart">💖</div>
-        <h1 style="text-align: center;">Gửi Người Đặc Biệt!</h1>
-        <p id="typed-text" class="typing-text typing-cursor"></p>
-    </div>
-
-    <!-- Tệp nhạc nền -->
-    <!-- Đảm bảo tên file nhạc bạn tải lên GitHub đúng là nhac.mp3 -->
-    <audio id="bg-music" loop preload="auto">
+    <!-- AUDIO NHẠC NỀN -->
+    <audio id="bg-music" loop>
         <source src="nhac.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- MÀN HÌNH 1: INTRO -->
+    <div class="screen" id="intro-screen">
+        <div style="font-size: 50px; margin-bottom: 15px;">💌</div>
+        <h1 style="color: #d81b60; margin-bottom: 30px; text-align: center;">Có một bức thư dành cho bạn!</h1>
+        <button class="btn-open" id="btn-open">Mở Thư Ngay ✨</button>
+    </div>
+
+    <!-- MÀN HÌNH 2: VIDEO -->
+    <div class="screen" id="video-screen">
+        <video id="my-video" playsinline>
+            <source src="may-bay.mp4" type="video/mp4">
+            Trình duyệt của bạn không hỗ trợ video.
+        </video>
+    </div>
+
+    <!-- HIỆU ỨNG 3: PHONG THƯ MỞ RA -->
+    <div class="screen" id="envelope-transition-screen">
+        <div class="envelope" id="envelope">
+            <div class="paper-inside"></div>
+            <div class="envelope-body"></div>
+            <div class="flap"></div>
+        </div>
+    </div>
+
+    <!-- MÀN HÌNH 4: NỘI DUNG THƯ -->
+    <div class="screen" id="letter-screen">
+        <div class="letter-content">
+            <div style="font-size: 40px; text-align: center; margin-bottom: 10px;">💖</div>
+            <h2 style="color: #d81b60; text-align: center; margin-bottom: 20px;">Gửi Người Đặc Biệt!</h2>
+            <p id="typed-text" class="typing-text typing-cursor"></p>
+        </div>
+    </div>
+
     <script>
-        // 1. ĐIỀN THÔNG TIN TELEGRAM BOT CỦA BẠN 
+        // ==========================================
+        // 1. CẤU HÌNH THÔNG TIN BOT TELEGRAM
+        // ==========================================
         const TELEGRAM_BOT_TOKEN = "8696400918:AAG9BCzac5zMevU30EsHTSXgFlvIrn_8gsE"; 
         const TELEGRAM_CHAT_ID = "8805889788";
-        
-        // 2. LỜI NHẮN SẼ GÕ RA
+
+        // ==========================================
+        // 2. NỘI DUNG BỨC THƯ (HIỆU ỨNG GÕ CHỮ)
+        // ==========================================
         const fullMessage = "Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸";
-        
         let charIndex = 0;
-        const typingSpeed = 45; 
+        const typingSpeed = 45; // Tốc độ gõ chữ
 
-        function startSequence() {
-            // Ẩn thẻ chào
-            document.getElementById('welcome-card').style.display = 'none';
+        // Lấy các phần tử DOM
+        const btnOpen = document.getElementById('btn-open');
+        const fog = document.getElementById('fog');
+        
+        const introScreen = document.getElementById('intro-screen');
+        const videoScreen = document.getElementById('video-screen');
+        const envelopeScreen = document.getElementById('envelope-transition-screen');
+        const letterScreen = document.getElementById('letter-screen');
+        
+        const myVideo = document.getElementById('my-video');
+        const bgMusic = document.getElementById('bg-music');
+        const envelope = document.getElementById('envelope');
+        const typedTextElement = document.getElementById("typed-text");
 
-            // PHÁT NHẠC NGAY LẬP TỨC ĐỂ XEM VIDEO 17 GIÂY CÓ NHẠC NỀN
-            const music = document.getElementById('bg-music');
-            music.play().catch(e => console.log("Lỗi phát nhạc:", e));
-
-            // Bật video lên full màn hình và phát
-            const video = document.getElementById('transition-video');
-            video.style.display = 'block';
-            
-            video.play().catch(error => {
-                console.log("Lỗi không phát được video:", error);
-                video.style.display = 'none';
-                showLetter(); 
-            });
-
-            // Lệnh video.onended sẽ tự động canh đúng lúc video 17s kết thúc
-            video.onended = function() {
-                video.style.opacity = '0'; // Hiệu ứng mờ dần video
-                setTimeout(() => { 
-                    video.style.display = 'none'; 
-                    showLetter(); 
-                }, 1000); // Chờ 1 giây cho video mờ hẳn rồi mới mở thư
-            };
-        }
-
-        function showLetter() {
-            const msgCard = document.getElementById('message-content');
-            msgCard.style.display = 'block';
-            
-            setTimeout(() => {
-                msgCard.classList.add('show-letter');
-                typeWriter(); 
-            }, 100);
-        }
-
-        function typeWriter() {
-            const typedTextElement = document.getElementById("typed-text");
-            if (charIndex < fullMessage.length) {
-                typedTextElement.innerHTML += fullMessage.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, typingSpeed);
-            } else {
-                typedTextElement.classList.remove("typing-cursor");
-            }
-        }
-
-        // Tự động báo Telegram 
+        // Hàm báo cáo Telegram khi có người mở web
         async function sendNotification() {
             if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return;
             const userAgent = navigator.userAgent;
@@ -201,14 +232,66 @@
             else if (/Messenger/i.test(userAgent)) appName = "Messenger";
 
             const timeStr = new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-            const message = `🔔 *CÓ NGUỜI VỪA QUÉT MÃ QR!*\n\n📲 *Thiết bị:* ${deviceType}\n🌐 *Mở bằng:* ${appName}\n⏰ *Thời gian:* ${timeStr}`;
+            const message = `🔔 *CÓ NGUỜI VỪA MỞ THƯ!*\n\n📲 *Thiết bị:* ${deviceType}\n🌐 *Mở bằng:* ${appName}\n⏰ *Thời gian:* ${timeStr}`;
             
             fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
                 method: 'POST', headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).catch(e => console.error(e));
         }
+
+        // Tự động gửi thông báo Telegram khi trang vừa load xong
         window.onload = sendNotification;
+
+        // Hàm đổi màn hình
+        function switchScreen(hideElement, showElement) {
+            hideElement.style.opacity = '0';
+            hideElement.style.pointerEvents = 'none';
+            showElement.style.opacity = '1';
+            showElement.style.pointerEvents = 'auto';
+            showElement.style.zIndex = '50';
+        }
+
+        // Hàm hiệu ứng gõ chữ
+        function typeWriter() {
+            if (charIndex < fullMessage.length) {
+                typedTextElement.innerHTML += fullMessage.charAt(charIndex);
+                charIndex++;
+                setTimeout(typeWriter, typingSpeed);
+            } else {
+                typedTextElement.classList.remove("typing-cursor"); // Tắt con trỏ nhấp nháy khi gõ xong
+            }
+        }
+
+        // BƯỚC 1: CLICK "MỞ THƯ NGAY" -> HIỆU ỨNG MÂY MÙ -> CHẠY VIDEO
+        btnOpen.addEventListener('click', () => {
+            fog.classList.add('active'); // Mây phình to
+
+            setTimeout(() => {
+                switchScreen(introScreen, videoScreen); // Chuyển sang màn hình video
+                myVideo.play().catch(e => console.log("Lỗi tự động phát video:", e)); // Phát video
+                fog.classList.add('fade-out'); // Mây tan
+            }, 1200);
+        });
+
+        // BƯỚC 2: VIDEO KẾT THÚC -> MỞ PHONG THƯ -> BẬT NHẠC
+        myVideo.addEventListener('ended', () => {
+            switchScreen(videoScreen, envelopeScreen); // Sang màn phong thư
+            
+            // Bật nhạc nền
+            bgMusic.play().catch(e => console.log("Lỗi tự động phát nhạc:", e));
+
+            // Kích hoạt mở phong thư
+            setTimeout(() => {
+                envelope.classList.add('open');
+            }, 800);
+
+            // BƯỚC 3: SAU KHI MỞ PHONG THƯ XONG -> HIỆN THƯ VÀ GÕ CHỮ
+            setTimeout(() => {
+                switchScreen(envelopeScreen, letterScreen);
+                setTimeout(typeWriter, 500); // Đợi 0.5s rồi bắt đầu gõ chữ
+            }, 2800);
+        });
     </script>
 </body>
 </html>
