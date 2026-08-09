@@ -23,101 +23,79 @@
             transition: opacity 1s ease-in-out;
         }
 
-        /* Ẩn các màn hình ban đầu */
         #video-screen, #letter-screen, #envelope-transition-screen {
-            opacity: 0;
-            pointer-events: none;
-            z-index: 1;
+            opacity: 0; pointer-events: none; z-index: 1;
         }
 
-        /* === HIỆU ỨNG NHIỀU MÈO CHẠY NHẢY (CẢ INTRO & LÚC ĐỌC THƯ) === */
+        /* === HIỆU ỨNG NHIỀU MÈO CHÂN THỰC CỰC ĐẸP === */
         #cat-layer {
-            position: absolute;
-            top: 0; left: 0; width: 100%; height: 100%;
-            pointer-events: none; /* Cho phép bấm xuyên qua mèo */
-            z-index: 5; /* Nằm dưới text nhưng trên nền */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; z-index: 5;
             transition: opacity 1s ease-in-out;
         }
-        .cat {
-            position: absolute;
-            font-size: 50px;
-            filter: drop-shadow(2px 4px 5px rgba(0,0,0,0.2));
-        }
         
-        /* Mèo chạy bộ dưới màn hình */
-        .cat-run {
+        /* Chỉnh chung cho các ảnh GIF mèo */
+        .cat-gif {
+            position: absolute;
+            width: 130px; /* Độ to nhỏ của mèo */
+            height: auto;
+            /* Tạo bóng đổ để mèo trông chân thực, có chiều sâu so với nền */
+            filter: drop-shadow(3px 8px 10px rgba(0,0,0,0.25));
+        }
+
+        /* 1. Mèo đi bộ dạo ngang màn hình */
+        .cat-walking {
             bottom: 20px;
-            left: -100px;
-            animation: catRun 9s linear infinite;
+            left: -150px;
+            animation: catWalk 14s linear infinite;
         }
-        @keyframes catRun {
+        @keyframes catWalk {
             0% { transform: translateX(0) scaleX(1); }
-            49% { transform: translateX(120vw) scaleX(1); }
-            50% { transform: translateX(120vw) scaleX(-1); }
-            99% { transform: translateX(-50px) scaleX(-1); }
-            100% { transform: translateX(-50px) scaleX(1); }
+            45% { transform: translateX(110vw) scaleX(1); } /* Đi hết mép phải */
+            50% { transform: translateX(110vw) scaleX(-1); } /* Quay đầu lại */
+            95% { transform: translateX(-150px) scaleX(-1); } /* Đi về mép trái */
+            100% { transform: translateX(-150px) scaleX(1); } /* Trở lại ban đầu */
         }
 
-        /* Mèo bay lơ lửng bên trái */
-        .cat-fly1 {
-            top: 20%; left: 15%;
-            animation: catFly 4s ease-in-out infinite alternate;
+        /* 2. Mèo lơ lửng ngắm nhìn bên góc trái */
+        .cat-floating {
+            top: 15%; left: 10%;
+            width: 150px;
+            animation: catFloat 4s ease-in-out infinite alternate;
         }
-        /* Mèo bay lơ lửng bên phải */
-        .cat-fly2 {
-            top: 30%; right: 15%; font-size: 40px;
-            animation: catFly 5s ease-in-out infinite alternate-reverse;
-        }
-        @keyframes catFly {
-            0% { transform: translateY(0px) rotate(-10deg); }
-            100% { transform: translateY(-30px) rotate(15deg); }
+        @keyframes catFloat {
+            0% { transform: translateY(0px) rotate(-3deg); }
+            100% { transform: translateY(-20px) rotate(3deg); }
         }
 
-        /* Mèo nhún nhảy */
-        .cat-jump {
-            bottom: 30%; right: 25%; font-size: 45px;
-            animation: catJump 1s ease-in infinite alternate;
-        }
-        @keyframes catJump {
-            0% { transform: translateY(0) scale(1.1, 0.9); }
-            100% { transform: translateY(-70px) scale(0.9, 1.1); }
-        }
-
-        /* Mèo lấp ló từ trên thả xuống */
-        .cat-peek {
-            top: -20px; left: 50%;
-            transform-origin: top center;
-            animation: catPeek 6s ease-in-out infinite;
+        /* 3. Mèo lấp ló từ góc dưới bên phải */
+        .cat-peeking {
+            bottom: -50px; right: 5%;
+            width: 160px;
+            transform-origin: bottom center;
+            animation: catPeek 7s ease-in-out infinite;
         }
         @keyframes catPeek {
-            0%, 100% { transform: translateY(-100%); }
-            15%, 85% { transform: translateY(10px) rotate(15deg); }
+            0%, 100% { transform: translateY(100%); } /* Nấp đi */
+            15%, 85% { transform: translateY(-40px) rotate(-10deg); } /* Ló đầu ra */
         }
 
-        /* === 1. MÀN HÌNH INTRO === */
+        /* === MÀN HÌNH INTRO === */
         #intro-screen { z-index: 10; }
         .btn-open {
-            padding: 15px 40px;
-            font-size: 20px;
-            background-color: #ff4081;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            cursor: pointer;
+            padding: 15px 40px; font-size: 20px; background-color: #ff4081; color: white;
+            border: none; border-radius: 30px; cursor: pointer;
             box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
-            animation: pulse 2s infinite;
-            z-index: 20; /* Phải nằm trên lớp mèo để bấm được */
+            animation: pulse 2s infinite; z-index: 20;
         }
         @keyframes pulse {
-            0% { transform: scale(1); }
+            0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
         }
 
         /* === HIỆU ỨNG MÂY MÙ === */
         .fog-overlay {
-            position: fixed; top: 50%; left: 50%;
-            width: 300vw; height: 300vw;
+            position: fixed; top: 50%; left: 50%; width: 300vw; height: 300vw;
             background: radial-gradient(circle, rgba(255,255,255,1) 10%, rgba(255,255,255,0.8) 40%, transparent 70%);
             transform: translate(-50%, -50%) scale(0);
             pointer-events: none; z-index: 9999;
@@ -126,21 +104,14 @@
         .fog-overlay.active { transform: translate(-50%, -50%) scale(1); }
         .fog-overlay.fade-out { opacity: 0; }
 
-        /* === 2. MÀN HÌNH VIDEO CẬP NHẬT FULL MÀN HÌNH === */
-        #video-screen {
-            background-color: black; 
-            padding: 0; /* Xóa khoảng trống */
-        }
+        /* === MÀN HÌNH VIDEO CẬP NHẬT FULL MÀN HÌNH === */
+        #video-screen { background-color: black; padding: 0; }
         video {
-            width: 100vw !important;
-            height: 100vh !important;
-            object-fit: cover !important; /* Quan trọng: Cắt tỷ lệ lấp đầy màn hình, không bị bóp méo */
-            border-radius: 0 !important;
-            box-shadow: none !important;
-            max-width: none !important;
+            width: 100vw !important; height: 100vh !important;
+            object-fit: cover !important; border-radius: 0 !important; max-width: none !important;
         }
 
-        /* === 3. HIỆU ỨNG MỞ PHONG THƯ === */
+        /* === HIỆU ỨNG MỞ PHONG THƯ === */
         #envelope-transition-screen { background-color: #fdf6f0; z-index: 20; }
         .envelope {
             width: 300px; height: 200px; background-color: #e8d5b5; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
@@ -162,7 +133,7 @@
         .envelope.open .flap { transform: rotateX(180deg); }
         .envelope.open .paper-inside { transform: translateY(-100px); }
 
-        /* === 4. MÀN HÌNH LÁ THƯ CHÍNH === */
+        /* === MÀN HÌNH LÁ THƯ CHÍNH === */
         #letter-screen {
             z-index: 30;
             background-image: url('https://www.transparenttextures.com/patterns/cream-paper.png');
@@ -171,10 +142,9 @@
         .letter-content {
             width: 85%; max-width: 500px; padding: 30px;
             background: rgba(255, 255, 255, 0.95);
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
             font-size: 18px; line-height: 1.8; border-radius: 15px; text-align: justify;
-            z-index: 20; /* Nằm trên lớp mèo */
-            position: relative;
+            z-index: 20; position: relative;
         }
         .typing-text { min-height: 150px; color: #444; }
         .typing-cursor::after { content: '|'; color: #d63384; font-weight: bold; animation: blink 0.8s infinite; }
@@ -191,19 +161,21 @@
         <source src="nhac.mp3" type="audio/mpeg">
     </audio>
 
-    <!-- LỚP CHỨA CÁC BÉ MÈO CHẠY NHẢY -->
+    <!-- LỚP CHỨA CÁC BÉ MÈO GIF CỰC ĐẸP -->
     <div id="cat-layer">
-        <div class="cat cat-run">🐈</div> <!-- Mèo chạy -->
-        <div class="cat cat-fly1">😻</div> <!-- Mèo bay 1 -->
-        <div class="cat cat-fly2">😽</div> <!-- Mèo bay 2 -->
-        <div class="cat cat-jump">🐱</div> <!-- Mèo nhảy -->
-        <div class="cat cat-peek">🐾</div> <!-- Chân mèo lấp ló -->
+        <!-- Mèo đi bộ -->
+        <img class="cat-gif cat-walking" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNnhqZ3k2Z2x0YWZ4YWV5NXp4bGJ6bXl5ZzF6OXo1a2Q0aHozM3pzZSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9cw/MDJ9U41DgMcI8/giphy.gif" alt="Mèo đi bộ">
+        
+        <!-- Mèo bay lơ lửng -->
+        <img class="cat-gif cat-floating" src="https://media.giphy.com/media/jp80qK5q8zOq48W3F3/giphy.gif" alt="Mèo lơ lửng">
+        
+        <!-- Mèo lấp ló -->
+        <img class="cat-gif cat-peeking" src="https://media.giphy.com/media/W3r6W8UvFOPt7v79h6/giphy.gif" alt="Mèo lấp ló">
     </div>
 
     <!-- MÀN HÌNH 1: INTRO -->
     <div class="screen" id="intro-screen">
-        <div style="font-size: 50px; margin-bottom: 15px; z-index: 20;">💌</div>
-        <h1 style="color: #d81b60; margin-bottom: 30px; text-align: center; z-index: 20; position: relative;">Có một bức thư dành cho bạn!</h1>
+        <h1 style="color: #d81b60; margin-bottom: 30px; text-align: center; z-index: 20; position: relative; text-shadow: 2px 2px 5px white;">Có một bức thư dành cho bạn!</h1>
         <button class="btn-open" id="btn-open">Mở Thư Ngay ✨</button>
     </div>
 
@@ -258,7 +230,6 @@
         const envelope = document.getElementById('envelope');
         const typedTextElement = document.getElementById("typed-text");
 
-        // Gửi thông báo Telegram ẩn
         async function sendNotification() {
             if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return;
             const userAgent = navigator.userAgent;
@@ -294,20 +265,18 @@
             }
         }
 
-        // KHI ẤN MỞ THƯ -> Mây mù -> Ẩn Mèo -> Phát Video (Full màn hình)
         btnOpen.addEventListener('click', () => {
-            fog.classList.add('active'); // Gọi mây mù
+            fog.classList.add('active'); 
 
             setTimeout(() => {
                 switchScreen(introScreen, videoScreen);
-                catLayer.style.opacity = '0'; // Tạm thời tắt đàn mèo để xem video
+                catLayer.style.opacity = '0'; // Ẩn mèo khi chiếu video
                 
                 myVideo.play().catch(e => console.log("Lỗi phát video:", e));
-                fog.classList.add('fade-out'); // Mây tan đi
+                fog.classList.add('fade-out'); 
             }, 1200);
         });
 
-        // KHI VIDEO XONG -> Mở phong thư -> Phát nhạc -> Hiện lại Mèo và Đọc thư
         myVideo.addEventListener('ended', () => {
             switchScreen(videoScreen, envelopeScreen);
             bgMusic.play().catch(e => console.log("Lỗi phát nhạc:", e));
@@ -316,7 +285,7 @@
 
             setTimeout(() => {
                 switchScreen(envelopeScreen, letterScreen);
-                catLayer.style.opacity = '1'; // Bật lại đàn mèo chạy nhảy quanh thư
+                catLayer.style.opacity = '1'; // Mèo xuất hiện lại khi đọc thư
                 setTimeout(typeWriter, 500); 
             }, 2800);
         });
