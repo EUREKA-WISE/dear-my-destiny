@@ -23,17 +23,79 @@
             transition: opacity 1s ease-in-out;
         }
 
-        /* Màn hình ban đầu bị ẩn mặc định, dùng JS để bật */
+        /* Ẩn các màn hình ban đầu */
         #video-screen, #letter-screen, #envelope-transition-screen {
             opacity: 0;
             pointer-events: none;
             z-index: 1;
         }
 
-        /* === 1. MÀN HÌNH INTRO === */
-        #intro-screen {
-            z-index: 10;
+        /* === HIỆU ỨNG NHIỀU MÈO CHẠY NHẢY (CẢ INTRO & LÚC ĐỌC THƯ) === */
+        #cat-layer {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; /* Cho phép bấm xuyên qua mèo */
+            z-index: 5; /* Nằm dưới text nhưng trên nền */
+            transition: opacity 1s ease-in-out;
         }
+        .cat {
+            position: absolute;
+            font-size: 50px;
+            filter: drop-shadow(2px 4px 5px rgba(0,0,0,0.2));
+        }
+        
+        /* Mèo chạy bộ dưới màn hình */
+        .cat-run {
+            bottom: 20px;
+            left: -100px;
+            animation: catRun 9s linear infinite;
+        }
+        @keyframes catRun {
+            0% { transform: translateX(0) scaleX(1); }
+            49% { transform: translateX(120vw) scaleX(1); }
+            50% { transform: translateX(120vw) scaleX(-1); }
+            99% { transform: translateX(-50px) scaleX(-1); }
+            100% { transform: translateX(-50px) scaleX(1); }
+        }
+
+        /* Mèo bay lơ lửng bên trái */
+        .cat-fly1 {
+            top: 20%; left: 15%;
+            animation: catFly 4s ease-in-out infinite alternate;
+        }
+        /* Mèo bay lơ lửng bên phải */
+        .cat-fly2 {
+            top: 30%; right: 15%; font-size: 40px;
+            animation: catFly 5s ease-in-out infinite alternate-reverse;
+        }
+        @keyframes catFly {
+            0% { transform: translateY(0px) rotate(-10deg); }
+            100% { transform: translateY(-30px) rotate(15deg); }
+        }
+
+        /* Mèo nhún nhảy */
+        .cat-jump {
+            bottom: 30%; right: 25%; font-size: 45px;
+            animation: catJump 1s ease-in infinite alternate;
+        }
+        @keyframes catJump {
+            0% { transform: translateY(0) scale(1.1, 0.9); }
+            100% { transform: translateY(-70px) scale(0.9, 1.1); }
+        }
+
+        /* Mèo lấp ló từ trên thả xuống */
+        .cat-peek {
+            top: -20px; left: 50%;
+            transform-origin: top center;
+            animation: catPeek 6s ease-in-out infinite;
+        }
+        @keyframes catPeek {
+            0%, 100% { transform: translateY(-100%); }
+            15%, 85% { transform: translateY(10px) rotate(15deg); }
+        }
+
+        /* === 1. MÀN HÌNH INTRO === */
+        #intro-screen { z-index: 10; }
         .btn-open {
             padding: 15px 40px;
             font-size: 20px;
@@ -43,72 +105,59 @@
             border-radius: 30px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(255, 64, 129, 0.4);
-            transition: transform 0.2s;
             animation: pulse 2s infinite;
+            z-index: 20; /* Phải nằm trên lớp mèo để bấm được */
         }
-        .btn-open:hover { transform: scale(1.05); }
         @keyframes pulse {
             0% { transform: scale(1); }
             50% { transform: scale(1.05); }
             100% { transform: scale(1); }
         }
 
-        /* === HIỆU ỨNG MÂY MÙ TRẮNG === */
+        /* === HIỆU ỨNG MÂY MÙ === */
         .fog-overlay {
-            position: fixed;
-            top: 50%; left: 50%;
+            position: fixed; top: 50%; left: 50%;
             width: 300vw; height: 300vw;
             background: radial-gradient(circle, rgba(255,255,255,1) 10%, rgba(255,255,255,0.8) 40%, transparent 70%);
             transform: translate(-50%, -50%) scale(0);
-            pointer-events: none;
-            z-index: 9999;
+            pointer-events: none; z-index: 9999;
             transition: transform 1.5s ease-in, opacity 1s ease-out;
         }
         .fog-overlay.active { transform: translate(-50%, -50%) scale(1); }
         .fog-overlay.fade-out { opacity: 0; }
 
-        /* === 2. MÀN HÌNH VIDEO === */
+        /* === 2. MÀN HÌNH VIDEO CẬP NHẬT FULL MÀN HÌNH === */
+        #video-screen {
+            background-color: black; 
+            padding: 0; /* Xóa khoảng trống */
+        }
         video {
-            width: 80%;
-            max-width: 800px;
-            border-radius: 15px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            background-color: black;
+            width: 100vw !important;
+            height: 100vh !important;
+            object-fit: cover !important; /* Quan trọng: Cắt tỷ lệ lấp đầy màn hình, không bị bóp méo */
+            border-radius: 0 !important;
+            box-shadow: none !important;
+            max-width: none !important;
         }
 
-        /* === HIỆU ỨNG 3: MỞ PHONG THƯ === */
-        #envelope-transition-screen {
-            background-color: #fdf6f0;
-            z-index: 20;
-        }
+        /* === 3. HIỆU ỨNG MỞ PHONG THƯ === */
+        #envelope-transition-screen { background-color: #fdf6f0; z-index: 20; }
         .envelope {
-            width: 300px; height: 200px;
-            background-color: #e8d5b5;
-            position: relative;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+            width: 300px; height: 200px; background-color: #e8d5b5; position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.15);
         }
         .flap {
             position: absolute; top: 0; left: 0;
-            border-left: 150px solid transparent;
-            border-right: 150px solid transparent;
+            border-left: 150px solid transparent; border-right: 150px solid transparent;
             border-top: 120px solid #d4b88c;
-            transform-origin: top;
-            transition: transform 1.5s ease-in-out;
-            z-index: 3;
+            transform-origin: top; transition: transform 1.5s ease-in-out; z-index: 3;
         }
         .envelope-body {
             position: absolute; bottom: 0; left: 0;
-            border-left: 150px solid #e0c9a6;
-            border-right: 150px solid #e0c9a6;
-            border-bottom: 120px solid #c8b08f;
-            z-index: 2;
+            border-left: 150px solid #e0c9a6; border-right: 150px solid #e0c9a6; border-bottom: 120px solid #c8b08f; z-index: 2;
         }
         .paper-inside {
-            position: absolute;
-            bottom: 10px; left: 10px; right: 10px; height: 180px;
-            background-color: #fff;
-            z-index: 1;
-            transition: transform 1.5s ease-in-out;
+            position: absolute; bottom: 10px; left: 10px; right: 10px; height: 180px; background-color: #fff;
+            z-index: 1; transition: transform 1.5s ease-in-out;
         }
         .envelope.open .flap { transform: rotateX(180deg); }
         .envelope.open .paper-inside { transform: translateY(-100px); }
@@ -120,29 +169,16 @@
             background-color: #fdf5e6;
         }
         .letter-content {
-            width: 85%;
-            max-width: 500px;
-            padding: 30px;
+            width: 85%; max-width: 500px; padding: 30px;
             background: rgba(255, 255, 255, 0.95);
             box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            font-size: 18px;
-            line-height: 1.8;
-            border-radius: 15px;
-            text-align: justify;
+            font-size: 18px; line-height: 1.8; border-radius: 15px; text-align: justify;
+            z-index: 20; /* Nằm trên lớp mèo */
+            position: relative;
         }
-        
-        /* Hiệu ứng con trỏ gõ chữ */
         .typing-text { min-height: 150px; color: #444; }
-        .typing-cursor::after {
-            content: '|';
-            color: #d63384;
-            font-weight: bold;
-            animation: blink 0.8s infinite;
-        }
-        @keyframes blink {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0; }
-        }
+        .typing-cursor::after { content: '|'; color: #d63384; font-weight: bold; animation: blink 0.8s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
     </style>
 </head>
 <body>
@@ -155,18 +191,26 @@
         <source src="nhac.mp3" type="audio/mpeg">
     </audio>
 
+    <!-- LỚP CHỨA CÁC BÉ MÈO CHẠY NHẢY -->
+    <div id="cat-layer">
+        <div class="cat cat-run">🐈</div> <!-- Mèo chạy -->
+        <div class="cat cat-fly1">😻</div> <!-- Mèo bay 1 -->
+        <div class="cat cat-fly2">😽</div> <!-- Mèo bay 2 -->
+        <div class="cat cat-jump">🐱</div> <!-- Mèo nhảy -->
+        <div class="cat cat-peek">🐾</div> <!-- Chân mèo lấp ló -->
+    </div>
+
     <!-- MÀN HÌNH 1: INTRO -->
     <div class="screen" id="intro-screen">
-        <div style="font-size: 50px; margin-bottom: 15px;">💌</div>
-        <h1 style="color: #d81b60; margin-bottom: 30px; text-align: center;">Có một bức thư dành cho bạn!</h1>
+        <div style="font-size: 50px; margin-bottom: 15px; z-index: 20;">💌</div>
+        <h1 style="color: #d81b60; margin-bottom: 30px; text-align: center; z-index: 20; position: relative;">Có một bức thư dành cho bạn!</h1>
         <button class="btn-open" id="btn-open">Mở Thư Ngay ✨</button>
     </div>
 
-    <!-- MÀN HÌNH 2: VIDEO -->
+    <!-- MÀN HÌNH 2: VIDEO (FULL MÀN HÌNH) -->
     <div class="screen" id="video-screen">
         <video id="my-video" playsinline>
             <source src="may-bay.mp4" type="video/mp4">
-            Trình duyệt của bạn không hỗ trợ video.
         </video>
     </div>
 
@@ -190,19 +234,16 @@
 
     <script>
         // ==========================================
-        // 1. CẤU HÌNH THÔNG TIN BOT TELEGRAM
+        // 1. CẤU HÌNH BOT TELEGRAM VÀ NỘI DUNG THƯ
         // ==========================================
         const TELEGRAM_BOT_TOKEN = "8696400918:AAG9BCzac5zMevU30EsHTSXgFlvIrn_8gsE"; 
         const TELEGRAM_CHAT_ID = "8805889788";
-
-        // ==========================================
-        // 2. NỘI DUNG BỨC THƯ (HIỆU ỨNG GÕ CHỮ)
-        // ==========================================
         const fullMessage = "Cảm ơn bạn đã quét mã QR này! Chúc bạn có một ngày luôn ngập tràn niềm vui, nụ cười và sự may mắn. Hãy luôn giữ vững năng lượng tích cực nhé! 🌸";
+        
         let charIndex = 0;
-        const typingSpeed = 45; // Tốc độ gõ chữ
+        const typingSpeed = 45;
 
-        // Lấy các phần tử DOM
+        // Lấy các DOM Element
         const btnOpen = document.getElementById('btn-open');
         const fog = document.getElementById('fog');
         
@@ -210,22 +251,20 @@
         const videoScreen = document.getElementById('video-screen');
         const envelopeScreen = document.getElementById('envelope-transition-screen');
         const letterScreen = document.getElementById('letter-screen');
+        const catLayer = document.getElementById('cat-layer');
         
         const myVideo = document.getElementById('my-video');
         const bgMusic = document.getElementById('bg-music');
         const envelope = document.getElementById('envelope');
         const typedTextElement = document.getElementById("typed-text");
 
-        // Hàm báo cáo Telegram khi có người mở web
+        // Gửi thông báo Telegram ẩn
         async function sendNotification() {
             if (!TELEGRAM_BOT_TOKEN || TELEGRAM_BOT_TOKEN.includes("ĐIỀN_")) return;
             const userAgent = navigator.userAgent;
             let deviceType = "Máy tính / Khác";
             if (/iPhone|iPad|iPod/i.test(userAgent)) deviceType = "📱 iPhone / iPad (iOS)";
-            else if (/Android/i.test(userAgent)) {
-                const match = userAgent.match(/Android\s+([0-9\.]+);?\s*([^;\)]*)/i);
-                deviceType = match && match[2] ? `📱 Android (${match[2]})` : "📱 Thiết bị Android";
-            }
+            else if (/Android/i.test(userAgent)) deviceType = "📱 Thiết bị Android";
             let appName = "Trình duyệt";
             if (/Zalo/i.test(userAgent)) appName = "Zalo";
             else if (/FBAN|FBAV/i.test(userAgent)) appName = "Facebook";
@@ -239,57 +278,46 @@
                 body: JSON.stringify({ chat_id: TELEGRAM_CHAT_ID, text: message, parse_mode: 'Markdown' })
             }).catch(e => console.error(e));
         }
-
-        // Tự động gửi thông báo Telegram khi trang vừa load xong
         window.onload = sendNotification;
 
-        // Hàm đổi màn hình
         function switchScreen(hideElement, showElement) {
-            hideElement.style.opacity = '0';
-            hideElement.style.pointerEvents = 'none';
-            showElement.style.opacity = '1';
-            showElement.style.pointerEvents = 'auto';
-            showElement.style.zIndex = '50';
+            hideElement.style.opacity = '0'; hideElement.style.pointerEvents = 'none';
+            showElement.style.opacity = '1'; showElement.style.pointerEvents = 'auto'; showElement.style.zIndex = '50';
         }
 
-        // Hàm hiệu ứng gõ chữ
         function typeWriter() {
             if (charIndex < fullMessage.length) {
                 typedTextElement.innerHTML += fullMessage.charAt(charIndex);
-                charIndex++;
-                setTimeout(typeWriter, typingSpeed);
+                charIndex++; setTimeout(typeWriter, typingSpeed);
             } else {
-                typedTextElement.classList.remove("typing-cursor"); // Tắt con trỏ nhấp nháy khi gõ xong
+                typedTextElement.classList.remove("typing-cursor");
             }
         }
 
-        // BƯỚC 1: CLICK "MỞ THƯ NGAY" -> HIỆU ỨNG MÂY MÙ -> CHẠY VIDEO
+        // KHI ẤN MỞ THƯ -> Mây mù -> Ẩn Mèo -> Phát Video (Full màn hình)
         btnOpen.addEventListener('click', () => {
-            fog.classList.add('active'); // Mây phình to
+            fog.classList.add('active'); // Gọi mây mù
 
             setTimeout(() => {
-                switchScreen(introScreen, videoScreen); // Chuyển sang màn hình video
-                myVideo.play().catch(e => console.log("Lỗi tự động phát video:", e)); // Phát video
-                fog.classList.add('fade-out'); // Mây tan
+                switchScreen(introScreen, videoScreen);
+                catLayer.style.opacity = '0'; // Tạm thời tắt đàn mèo để xem video
+                
+                myVideo.play().catch(e => console.log("Lỗi phát video:", e));
+                fog.classList.add('fade-out'); // Mây tan đi
             }, 1200);
         });
 
-        // BƯỚC 2: VIDEO KẾT THÚC -> MỞ PHONG THƯ -> BẬT NHẠC
+        // KHI VIDEO XONG -> Mở phong thư -> Phát nhạc -> Hiện lại Mèo và Đọc thư
         myVideo.addEventListener('ended', () => {
-            switchScreen(videoScreen, envelopeScreen); // Sang màn phong thư
-            
-            // Bật nhạc nền
-            bgMusic.play().catch(e => console.log("Lỗi tự động phát nhạc:", e));
+            switchScreen(videoScreen, envelopeScreen);
+            bgMusic.play().catch(e => console.log("Lỗi phát nhạc:", e));
 
-            // Kích hoạt mở phong thư
-            setTimeout(() => {
-                envelope.classList.add('open');
-            }, 800);
+            setTimeout(() => { envelope.classList.add('open'); }, 800);
 
-            // BƯỚC 3: SAU KHI MỞ PHONG THƯ XONG -> HIỆN THƯ VÀ GÕ CHỮ
             setTimeout(() => {
                 switchScreen(envelopeScreen, letterScreen);
-                setTimeout(typeWriter, 500); // Đợi 0.5s rồi bắt đầu gõ chữ
+                catLayer.style.opacity = '1'; // Bật lại đàn mèo chạy nhảy quanh thư
+                setTimeout(typeWriter, 500); 
             }, 2800);
         });
     </script>
