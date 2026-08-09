@@ -93,8 +93,23 @@
         /* === STICKER GIF MÈO Ở GÓC BỨC THƯ === */
         .letter-sticker {
             position: absolute;
-            bottom: 15px;
+            top: 20px;
             right: 20px;
+            width: 75px;
+            height: auto;
+            animation: stickerBounce 2s ease-in-out infinite alternate;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.15));
+        }
+        @keyframes stickerBounce {
+            0% { transform: translateY(0) rotate(0deg); }
+            100% { transform: translateY(-8px) rotate(5deg); }
+        }
+
+        /* === STICKER GIF MÈO Ở GÓC BỨC THƯ 2 === */
+        .letter-sticker2 {
+            position: absolute;
+            top: 20px;
+            left: 20px;
             width: 75px;
             height: auto;
             animation: stickerBounce 2s ease-in-out infinite alternate;
@@ -271,7 +286,8 @@
             </div>
             
             <!-- STICKER MÈO GIF Ở GÓC -->
-            <img class="letter-sticker" src="meo6.gif" alt="Sticker Mèo Giao Diện Thư">
+            <img class="letter-sticker" src="meo1.gif" alt="Sticker Mèo Giao Diện Thư">
+            <img class="letter-sticker2" src="meo4.gif" alt="Sticker Mèo Giao Diện Thư">
         </div>
     </div>
 
